@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>🎉 مَبروووك يا رانيا! — قاعة التتويج</title>
+  <style>
+    :root{
+      --bg:#070c1c; --panel:#0e1a32; --card:rgba(255,255,255,.06);
+      --text:#eef2ff; --muted:#c7d2fe; --border:rgba(255,255,255,.14);
+      --accent:#7c99ff; --accent2:#68e7ff; --gold:#f6d365; --gold2:#fda085; --good:#22c55e
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;min-height:100dvh;display:grid;place-items:start center;background:
+      radial-gradient(140% 120% at 80% 0%, #1e2a60 0%, var(--bg) 45%),
+      linear-gradient(135deg, rgba(124,153,255,.12), rgba(104,231,255,.12));
+      color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Noto Kufi Arabic","Noto Sans Arabic";overflow-x:hidden}
+
+    .stars{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.6}
+    .stars span{position:absolute;width:2px;height:2px;background:#cfe0ff;border-radius:50%;filter:drop-shadow(0 0 6px #8ec5ff);animation:twinkle 3s ease-in-out infinite}
+    @keyframes twinkle{50%{transform:scale(1.8);opacity:.3}}
+
+    .wrap{max-width:1100px;margin:22px auto;padding:0 14px;display:grid;gap:14px;position:relative;z-index:2}
+
+    header{position:relative;display:grid;gap:10px;place-items:center;text-align:center}
+    h1{margin:0;font-size:clamp(28px,3vw,46px);background:linear-gradient(90deg,var(--gold),var(--gold2));-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 12px 40px rgba(246,211,101,.18)}
+    .lead{color:var(--muted)}
+    .crown{font-size:clamp(40px,6vw,86px);display:inline-block;animation:pop 1.2s cubic-bezier(.2,.7,.2,1) both}
+    @keyframes pop{0%{transform:scale(.6) rotate(-10deg);opacity:0}60%{transform:scale(1.08)}100%{transform:scale(1)}}
+    .praise{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+    .badge{padding:.45rem .8rem;border-radius:999px;background:rgba(124,153,255,.16);border:1px solid rgba(124,153,255,.4);font-weight:800}
+
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
+    .col-12{grid-column:1/-1}.col-8{grid-column:span 8}.col-4{grid-column:span 4}
+    @media (max-width:980px){.col-8,.col-4{grid-column:1/-1}}
+
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;backdrop-filter:blur(8px)}
+    .head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border)}
+    .content{padding:14px}
+
+    .btn{cursor:pointer;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--text);padding:.7rem 1rem;border-radius:12px;font-weight:800;transition:transform .12s ease,filter .2s ease}
+    .btn.primary{background:linear-gradient(135deg, rgba(124,153,255,.35), rgba(104,231,255,.25));border-color:rgba(124,153,255,.5)}
+    .btn.good{background:linear-gradient(135deg, rgba(34,197,94,.25), rgba(124,153,255,.2));border-color:rgba(34,197,94,.45)}
+    .btn.gold{background:linear-gradient(135deg, rgba(246,211,101,.35), rgba(253,160,133,.25));border-color:rgba(255,215,128,.6)}
+    .btn:active{transform:translateY(1px)}
+
+    .list{display:grid;gap:10px}
+    .note{padding:10px;border:1px dashed rgba(255,255,255,.22);border-radius:12px;background:rgba(255,255,255,.04)}
+
+    .ring{position:relative;display:grid;place-items:center}
+    .ring svg{width:120px;height:120px;transform:rotate(-90deg)}
+    .ring .val{position:absolute;text-align:center;font:900 18px/1 ui-sans-serif}
+
+    .toast{position:fixed;bottom:18px;inset-inline:0;margin-inline:auto;width:fit-content;background:rgba(124,153,255,.18);border:1px solid rgba(124,153,255,.45);padding:.55rem .9rem;border-radius:999px;color:#cfe0ff;backdrop-filter:blur(8px);font-weight:800;opacity:0;transform:translateY(8px);transition:all .25s ease;z-index:60}
+    .toast.show{opacity:1;transform:none}
+
+    .spark{position:fixed;width:6px;height:6px;border-radius:50%;background:#9fd1ff;box-shadow:0 0 10px #9fd1ff;pointer-events:none;z-index:55;opacity:.7}
+
+    #confetti,#fireworks{position:fixed;inset:0;pointer-events:none;z-index:1}
+  </style>
+</head>
+<body>
+  <canvas id="confetti"></canvas>
+  <canvas id="fireworks"></canvas>
+  <div class="stars" id="stars"></div>
+  <audio id="applause" preload="auto"><source src="data:audio/mp3;base64,//uQZAAAAAAAAAAAAAAAAAAAA..." type="audio/mp3"></audio>
+
+  <div class="wrap">
+    <header>
+      <div class="crown">👑</div>
+      <h1>تتويج رانيا — بطلة الالتزام اليوم!</h1>
+      <p class="lead">إنجاز مُشرّف، تركيز صادق، ونتيجة تِشرح القلب. استقبلي فيض المدح اللي بتستحقيه 💙</p>
+      <div id="praise" class="praise"></div>
+      <div class="praise">
+        <span class="badge">قدّها وقدود</span>
+        <span class="badge">أسطورة المثابرة</span>
+        <span class="badge">ملكة التشابترات</span>
+      </div>
+    </header>
+
+    <section class="grid">
+      <div class="card col-8">
+        <div class="head"><strong>✨ ملخص إنجاز اليوم</strong><small id="dateNow">—</small></div>
+        <div class="content" style="display:grid;gap:10px">
+          <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+            <div class="ring">
+              <svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" stroke="rgba(255,255,255,.15)" stroke-width="12" fill="none"/><circle id="ring" cx="60" cy="60" r="52" stroke="url(#g)" stroke-width="12" stroke-linecap="round" fill="none" stroke-dasharray="327" stroke-dashoffset="327"/></svg>
+              <div class="val"><span id="pct">100%</span></div>
+              <svg width="0" height="0"><defs><linearGradient id="g"><stop offset="0%" stop-color="var(--accent)"/><stop offset="100%" stop-color="var(--accent2)"/></linearGradient></defs></svg>
+            </div>
+            <div>
+              <div><strong>التشابترات المكتملة:</strong> <span id="done">—</span>/<span id="total">—</span></div>
+              <div><strong>الوقت المُخطط:</strong> <span id="hours">—</span> ساعة</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button id="share" class="btn primary">📣 شاركي إنجازك</button>
+            <button id="badge" class="btn gold">🏅 نزّلي وسام التتويج</button>
+            <button id="anthem" class="btn good">🎵 نشيد الانتصار</button>
+            <button id="encore" class="btn">🎊 دفعة كونفيتي</button>
+            <button id="back" class="btn">↩︎ عودي للخطة</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card col-4">
+        <div class="head"><strong>🎯 الخطوة التالية</strong><small>تحافظي على الزخم</small></div>
+        <div class="content">
+          <p class="lead" style="font-size:.95rem">جلسة مراجعة مرنة 10 دقائق (فل سكرين اختياري):</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button id="startReview" class="btn">▶️ ابدئي المراجعة</button>
+            <button id="stopReview" class="btn">⏹️ إيقاف</button>
+          </div>
+          <p id="revLabel" style="margin:.5rem 0 0;color:var(--muted)">10:00</p>
+        </div>
+      </div>
+
+      <div class="card col-12">
+        <div class="head"><strong>📝 أهم النقاط التي كتبتيها اليوم</strong><small>جاهزة لمراجعة سريعة</small></div>
+        <div id="notesBox" class="content"><p class="lead">لا توجد نقاط محفوظة.</p></div>
+      </div>
+
+      <div class="card col-12">
+        <div class="head"><strong>🎫 تذكرة ذهبية</strong><small>مكافأة صغيرة اليوم — من اختيارك</small></div>
+        <div class="content" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <button id="goldTicket" class="btn gold">✨ افتحي التذكرة</button>
+          <span id="ticketText" class="lead">—</span>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const $=(id)=>document.getElementById(id);
+    const SKEY='rania_final_plan_v1', SKEY_NOTES='rania_final_notes_v1';
+    function fmt(s){ const m=Math.floor(s/60), S=s%60; return String(m).padStart(2,'0')+':'+String(S).padStart(2,'0') }
+
+    const stars=$('stars'); for(let i=0;i<90;i++){ const sp=document.createElement('span'); sp.style.left=(Math.random()*100)+'%'; sp.style.top=(Math.random()*100)+'%'; sp.style.animationDelay=(Math.random()*3)+'s'; stars.appendChild(sp); }
+
+    const plan = JSON.parse(localStorage.getItem(SKEY)||'null') || {meta:{total:0,hours:0}, tasks:[]};
+    const total = plan.meta.total||0;
+    const done = Math.round(plan.tasks.filter(t=>t.done && /قراءة|ملخص|أسئلة/.test(t.title)).length/3);
+    $('total').textContent = total; $('done').textContent = done; $('hours').textContent = plan.meta.hours||'—'; $('dateNow').textContent = new Date().toLocaleDateString('ar-JO',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    const pct = total? Math.min(100, Math.round(done/total*100)) : 0; $('pct').textContent=pct+'%'; $('ring').style.strokeDashoffset = 327*(1-pct/100);
+
+    const lines=[
+      'يا سلام! أداء أسطوري — رانيا ملكة اليوم 👑',
+      'تركيز يدرّس… إنجاز يفتخر فيه 💎',
+      'ما شاء الله — خطّة اتنفذت حرفيًا 👏',
+      'كل تشابتر سقط، وأنتِ لسه ثابتة 💪',
+      'الإنضباط علامة الأبطال — برافو يا بطل! 🏆',
+    ];
+    const praise=$('praise');
+    function showLine(i){ const pill=document.createElement('span'); pill.className='badge'; pill.textContent=lines[i%lines.length]; praise.prepend(pill); if(praise.childElementCount>4) praise.lastElementChild.remove(); }
+    let li=0; showLine(li++); setInterval(()=>showLine(li++), 2200);
+
+    const confetti=document.getElementById('confetti'); const cctx=confetti.getContext('2d');
+    const fireworks=document.getElementById('fireworks'); const fctx=fireworks.getContext('2d');
+    function resize(){ confetti.width=innerWidth; confetti.height=innerHeight; fireworks.width=innerWidth; fireworks.height=innerHeight }
+    addEventListener('resize', resize); resize();
+    let parts=[]; function R(a,b){return Math.random()*(b-a)+a}
+    function celebrate(amount=300){ const colors=['#7c99ff','#68e7ff','#a78bfa','#34d399','#fde047']; for(let i=0;i<amount;i++){ parts.push({x:innerWidth/2,y:120,vx:R(-6,6),vy:R(-10,-3),g:R(.08,.18),s:R(2,5),r:R(0,360),vr:R(-6,6),c:colors[(Math.random()*colors.length)|0],shape:Math.random()<.5?'rect':'circle',life:0}); } }
+    (function step(){ cctx.clearRect(0,0,confetti.width,confetti.height); parts.forEach(p=>{ p.vy+=p.g; p.x+=p.vx; p.y+=p.vy; p.r+=p.vr; p.life++; cctx.save(); cctx.translate(p.x,p.y); cctx.rotate(p.r*Math.PI/180); cctx.fillStyle=p.c; if(p.shape==='rect') cctx.fillRect(-p.s,-p.s,p.s*2,p.s*2); else{ cctx.beginPath(); cctx.arc(0,0,p.s,0,Math.PI*2); cctx.fill(); } cctx.restore(); }); parts=parts.filter(p=>p.y<innerHeight+40 && p.life<600); requestAnimationFrame(step); })();
+
+    let fw=[]; function boom(){ const x=R(100, innerWidth-100), y=R(100, innerHeight/2), n=R(30,60)|0, col=`hsl(${R(180,300)},100%,70%)`; for(let i=0;i<n;i++){ const a=R(0,Math.PI*2), sp=R(1,4); fw.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:0,col}); } }
+    (function fire(){ fctx.fillStyle='rgba(0,0,0,.08)'; fctx.fillRect(0,0,fireworks.width,fireworks.height); fw.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; p.vy+=.02; p.life++; fctx.fillStyle=p.col; fctx.fillRect(p.x,p.y,2,2); }); fw=fw.filter(p=>p.life<120); requestAnimationFrame(fire); })();
+
+    celebrate(380); setInterval(()=>{ celebrate(140); boom(); }, 1400);
+    try{ const ap=$('applause'); ap.currentTime=0; ap.play(); }catch{}
+
+    addEventListener('mousemove', (e)=>{ const s=document.createElement('div'); s.className='spark'; s.style.left=e.clientX+'px'; s.style.top=e.clientY+'px'; document.body.appendChild(s); setTimeout(()=>s.remove(),500); });
+
+    function toast(msg){ const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); requestAnimationFrame(()=>t.classList.add('show')); setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(),250); },1500); }
+
+    $('share').addEventListener('click', async ()=>{
+      const text = `رانيا خلصت خطتها اليوم 🎉 (إنجاز ${pct}%) — بطلة الالتزام!`;
+      if(navigator.share){ try{ await navigator.share({text}); }catch{} } else { await navigator.clipboard?.writeText(text); toast('نَسخنا نص المشاركة ✅'); }
+    });
+
+    $('badge').addEventListener('click', ()=>{
+      const canvas=document.createElement('canvas'); canvas.width=1000; canvas.height=560; const ctx=canvas.getContext('2d');
+      const grd=ctx.createLinearGradient(0,0,1000,0); grd.addColorStop(0,'#f6d365'); grd.addColorStop(1,'#fda085');
+      ctx.fillStyle='#0e1a32'; ctx.fillRect(0,0,1000,560); ctx.strokeStyle=grd; ctx.lineWidth=8; ctx.strokeRect(20,20,960,520);
+      ctx.font='bold 52px system-ui'; ctx.fillStyle='#ffdca8'; ctx.textAlign='center';
+      ctx.fillText('وسام التتويج – رانيا', 500, 170);
+      ctx.font='700 30px system-ui'; ctx.fillText(`إنجاز اليوم: ${pct}%`, 500, 230);
+      ctx.fillText(new Date().toLocaleDateString('ar-JO',{weekday:'long',year:'numeric',month:'long',day:'numeric'}), 500, 270);
+      ctx.font='bold 110px system-ui'; ctx.fillText('👑', 500, 380);
+      const url=canvas.toDataURL('image/png'); const a=document.createElement('a'); a.href=url; a.download='وسام_التتويج_رانيا.png'; a.click();
+    });
+
+    const ap=$('applause');
+    $('anthem').addEventListener('click',()=>{ try{ ap.currentTime=0; ap.play(); toast('تشغيل التصفيق! 👏'); }catch{} });
+    $('encore').addEventListener('click',()=>{ celebrate(300); boom(); toast('كونفيتي زياده! 🎊') });
+    $('back').addEventListener('click',()=> location.href='plan.html');
+
+    const notesBox=$('notesBox');
+    const notes=localStorage.getItem(SKEY_NOTES)||'';
+    function renderNotes(){
+      notesBox.innerHTML='';
+      const wrap=document.createElement('div'); wrap.className='list';
+      const arr = notes.split(/\n+/).map(s=>s.trim()).filter(Boolean);
+      if(!arr.length){ notesBox.innerHTML='<p class="lead">لا توجد نقاط محفوظة.</p>'; return }
+      arr.forEach((line,i)=>{ const div=document.createElement('div'); div.className='note'; div.textContent=(i+1)+'. '+line; wrap.append(div); });
+      const tools=document.createElement('div'); tools.style.marginTop='8px';
+      const btn=document.createElement('button'); btn.className='btn'; btn.textContent='⬇️ تصدير'; btn.addEventListener('click',()=>{ const blob=new Blob([notes],{type:'text/plain'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='rania_notes.txt'; a.click(); URL.revokeObjectURL(url); });
+      tools.append(btn); notesBox.append(wrap,tools);
+    }
+    renderNotes();
+
+    let revTimer=null, revRemain=600, revRun=false;
+    function startReview(){ if(revRun) return; revRun=true; revRemain=600; $('revLabel').textContent=fmt(revRemain); try{ document.documentElement.requestFullscreen(); }catch{} celebrate(120); revTimer=setInterval(()=>{ revRemain--; $('revLabel').textContent=fmt(revRemain); if(revRemain<=0){ stopReview(); toast('انتهت مراجعة 10 د — بطلة! 👑'); } },1000); }
+    function stopReview(){ clearInterval(revTimer); revRun=false; $('revLabel').textContent='10:00'; document.exitFullscreen?.(); }
+    $('startReview').addEventListener('click', startReview); $('stopReview').addEventListener('click', stopReview);
+
+    const ideas=[
+      'قهوة مختصة على حساب الإنجاز ☕️',
+      'حلقة مسلسل قصيرة 🍿',
+      'مشي 15 دقيقة مع موسيقى 🎧',
+      'سناك حلو صغير 🍫',
+      'مكالمة قصيرة مع صديقة 💬',
+      'Power Nap عشر دقائق 😴',
+    ];
+    $('goldTicket').addEventListener('click',()=>{ const t=ideas[(Math.random()*ideas.length)|0]; $('ticketText').textContent='مكافأتك: '+t; celebrate(180); });
+  </script>
+</body>
+</html>

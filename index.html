@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>⏳ العدّاد للعطلة – رانيا</title>
+  <style>
+    :root{
+      --bg1:#0b1220; --bg2:#0e1630; --text:#eaf0ff; --muted:#b9c4e6; --accent:#7c99ff; --accent2:#68e7ff;
+      --card:rgba(255,255,255,.06); --border:rgba(255,255,255,.14)
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;min-height:100dvh;display:grid;place-items:center;background:
+      radial-gradient(140% 120% at 80% 0%, #203a8f 0%, var(--bg1) 45%),
+      linear-gradient(135deg, rgba(124,153,255,.10), rgba(104,231,255,.10));
+      color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Noto Kufi Arabic","Noto Sans Arabic";overflow:hidden}
+
+    .stars{position:fixed;inset:0;pointer-events:none;opacity:.5}
+    .stars span{position:absolute;width:2px;height:2px;background:#cfe0ff;border-radius:50%;filter:drop-shadow(0 0 6px #8ec5ff);animation:twinkle 3s ease-in-out infinite}
+    @keyframes twinkle{50%{transform:scale(1.8);opacity:.3}}
+
+    .wrap{width:min(1100px,94vw);display:grid;gap:14px;place-items:center;text-align:center;position:relative;z-index:2}
+    .hero{display:grid;gap:8px}
+    h1{margin:0;font-size:clamp(28px,3vw,46px)}
+    .lead{color:var(--muted)}
+
+    .card{background:var(--card);border:1px solid var(--border);border-radius:18px;backdrop-filter:blur(8px);padding:16px;display:grid;gap:12px}
+
+    /* TIMER */
+    .timer{display:grid;gap:10px}
+    .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+    .box{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:16px;padding:14px}
+    .num{font-variant-numeric:tabular-nums;font-weight:900;font-size:clamp(28px,4.2vw,54px)}
+    .lab{color:var(--muted)}
+
+    .btn{cursor:pointer;border:1px solid var(--border);background:linear-gradient(135deg, rgba(124,153,255,.35), rgba(104,231,255,.25));color:var(--text);padding:.9rem 1.2rem;border-radius:14px;font-weight:900;transition:transform .12s ease}
+    .btn:active{transform:translateY(1px)}
+
+    .hint{color:var(--muted);font-size:.95rem}
+    .note{margin-top:4px;color:#ffd6a6;background:rgba(255,214,166,.12);border:1px solid rgba(255,214,166,.35);padding:.45rem .7rem;border-radius:12px;display:inline-block}
+
+    /* floating shapes */
+    .float{position:fixed;inset:0;pointer-events:none;opacity:.55}
+    .cloud{position:absolute;filter:blur(18px);border-radius:50%;background:conic-gradient(from 0deg, rgba(124,153,255,.25), rgba(104,231,255,.25), rgba(167,139,250,.25));animation:move 18s linear infinite}
+    .c1{width:30vmax;height:30vmax;top:-10vmax;right:-8vmax}
+    .c2{width:22vmax;height:22vmax;bottom:-8vmax;left:-10vmax;animation-duration:24s}
+    @keyframes move{to{transform:rotate(1turn)}}
+  </style>
+</head>
+<body>
+  <div class="stars" id="stars"></div>
+  <div class="float"><div class="cloud c1"></div><div class="cloud c2"></div></div>
+
+  <main class="wrap">
+    <section class="hero">
+      <h1>⏳ العدّاد لغاية العُطلة</h1>
+      <p class="lead">نعدّ لعند <strong>6 سبتمبر الساعة 5:00 مساءً</strong>… وبعدها بتكوني مُستحقة كل راحة 🤍</p>
+      <span class="note">سمعت إنك دخلتي مود العُطلة من هسّا !!!!!!!!!! 😏</span>
+    </section>
+
+    <section class="card">
+      <div class="timer">
+        <div class="grid">
+          <div class="box"><div id="d" class="num">—</div><div class="lab">يوم</div></div>
+          <div class="box"><div id="h" class="num">—</div><div class="lab">ساعة</div></div>
+          <div class="box"><div id="m" class="num">—</div><div class="lab">دقيقة</div></div>
+          <div class="box"><div id="s" class="num">—</div><div class="lab">ثانية</div></div>
+        </div>
+        <div class="hint">جاهزة تثبتي إنك قدّها قبل العطلة؟</div>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+          <button id="ready" class="btn">أنا جاهزة 💪</button>
+          <button id="later" class="btn" style="background:rgba(255,255,255,.06)">بعدين 🙂</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Stars
+    const stars=document.getElementById('stars'); for(let i=0;i<90;i++){ const s=document.createElement('span'); s.style.left=(Math.random()*100)+'%'; s.style.top=(Math.random()*100)+'%'; s.style.animationDelay=(Math.random()*3)+'s'; stars.appendChild(s); }
+
+    // Timer to Sept 6, 17:00 (local time)
+    const target = new Date();
+    // set to current year Sept 6 17:00 local
+    const yr = new Date().getFullYear();
+    target.setFullYear(yr, 8, 6); // month index 8 = September
+    target.setHours(17,0,0,0);
+    function tick(){ const now=new Date(); let diff=target-now; if(diff<0){ diff=0; }
+      const d=Math.floor(diff/86400000); const h=Math.floor((diff%86400000)/3600000); const m=Math.floor((diff%3600000)/60000); const s=Math.floor((diff%60000)/1000);
+      document.getElementById('d').textContent=d; document.getElementById('h').textContent=h; document.getElementById('m').textContent=m; document.getElementById('s').textContent=s;
+    }
+    tick(); setInterval(tick,1000);
+
+    document.getElementById('ready').addEventListener('click',()=>{ location.href='plan.html'; });
+    document.getElementById('later').addEventListener('click',()=>{ alert('خذي نفس… بس لا تطولي 😄'); });
+  </script>
+</body>
+</html>
