@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>خطة رانيا للدراسة – وضع الفاينل</title>
+  <title>خطة رانيا للدراسة – وضع الفاينل (التحفيز الفائق ++)</title>
   <style>
     :root{
       --bg:#0b1020; --panel:#0f172a; --card:rgba(255,255,255,.06);
@@ -56,7 +56,7 @@
 
     /* TODAY LIST */
     .list{display:grid;gap:10px}
-    .task{display:flex;align-items:center;justify-content:space-between;padding:10px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.03)}
+    .task{display:flex;align-items:center;justify-content:space-between;padding:10px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.03);position:relative;overflow:hidden}
     .task .left{display:flex;align-items:center;gap:9px}
     .task input[type="checkbox"]{width:18px;height:18px}
 
@@ -77,6 +77,21 @@
     /* OVERLAY */
     .overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(3px);display:none;place-items:center;z-index:40}
     .overlay .box{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:16px;text-align:center;max-width:520px}
+
+    /* CELEBRATION */
+    .celebrate{position:fixed;inset:0;display:none;place-items:center;z-index:60;pointer-events:none}
+    .celebrate.show{display:grid}
+    .wow{font:900 clamp(36px,10vw,120px)/1 ui-sans-serif;letter-spacing:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 8px 24px rgba(124,153,255,.4));animation:wowPop .9s ease;text-align:center}
+    @keyframes wowPop{0%{transform:scale(.6) rotate(-2deg);opacity:.2}60%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+    .confetti{position:fixed;inset:0;overflow:hidden;z-index:55;pointer-events:none}
+    .piece{position:absolute;width:10px;height:18px;background:linear-gradient(180deg,var(--accent),var(--accent2));opacity:.9;border-radius:3px;animation:fall 1.6s ease-out forwards}
+    @keyframes fall{to{transform:translateY(120vh) rotate(540deg);opacity:0}}
+
+    .spark{position:absolute;width:6px;height:6px;border-radius:50%;background:linear-gradient(90deg,var(--accent),var(--accent2));filter:drop-shadow(0 0 8px rgba(124,153,255,.8));pointer-events:none}
+
+    /* emoji rain */
+    .emoji{position:fixed;font-size:32px;pointer-events:none;animation:drop 1.6s ease forwards;z-index:59}
+    @keyframes drop{0%{transform:translateY(-80px)}100%{transform:translateY(120vh);opacity:0}}
   </style>
 </head>
 <body>
@@ -101,25 +116,25 @@
         <div class="content">
           <div class="row">
             <div>
-              <label>عدد التشابترات</label>
+              <label for="total">عدد التشابترات</label>
               <input id="total" type="number" min="1" placeholder="مثال: 10" />
             </div>
             <div>
-              <label>الساعات المتاحة اليوم</label>
+              <label for="hours">الساعات المتاحة اليوم</label>
               <input id="hours" type="number" min="1" step="0.5" value="6" />
             </div>
             <div>
-              <label>وقت الامتحان (اختياري)</label>
+              <label for="exam">وقت الامتحان (اختياري)</label>
               <input id="exam" type="datetime-local" />
             </div>
           </div>
           <div class="row" style="grid-template-columns:repeat(4,1fr);margin-top:10px">
             <div>
-              <label>جلسة التركيز (دقيقة)</label>
+              <label for="focusMin">جلسة التركيز (دقيقة)</label>
               <input id="focusMin" type="number" min="15" value="25" />
             </div>
             <div>
-              <label>راحة (دقيقة)</label>
+              <label for="breakMin">راحة (دقيقة)</label>
               <input id="breakMin" type="number" min="3" value="5" />
             </div>
             <div style="display:flex;align-items:flex-end"><button id="build" class="btn primary" style="width:100%">🚀 ابني الخطة</button></div>
@@ -175,98 +190,162 @@
     </div>
   </section>
 
+  <!-- CELEBRATION LAYER -->
+  <div id="celebrate" class="celebrate"><div id="wow" class="wow">وااااااااو 🎉</div></div>
+  <div id="confetti" class="confetti" aria-hidden="true"></div>
+
   <div id="toast" class="toast" role="status" aria-live="polite">تم</div>
 
   <script>
-    // ELEMENTS
     const $ = (id)=>document.getElementById(id);
-    const el={total:$('total'), hours:$('hours'), exam:$('exam'), focusMin:$('focusMin'), breakMin:$('breakMin'), build:$('build'), clear:$('clear'), today:$('today'), timeline:$('timeline'), notes:$('notes'), saveNotes:$('saveNotes'), exportNotes:$('exportNotes'), clearNotes:$('clearNotes'), startFocus:$('startFocus'), stopFocus:$('stopFocus'), focusLabel:$('focusLabel'), overlay:$('overlay'), panic:$('panic'), pct:$('pct'), ring:document.getElementById('ring'), toast:$('toast')};
+    const el={total:$("total"), hours:$("hours"), exam:$("exam"), focusMin:$("focusMin"), breakMin:$("breakMin"), build:$("build"), clear:$("clear"), today:$("today"), timeline:$("timeline"), notes:$("notes"), saveNotes:$("saveNotes"), exportNotes:$("exportNotes"), clearNotes:$("clearNotes"), startFocus:$("startFocus"), stopFocus:$("stopFocus"), focusLabel:$("focusLabel"), overlay:$("overlay"), panic:$("panic"), pct:$("pct"), ring:document.getElementById("ring"), toast:$("toast"), celebrate:$("celebrate"), confetti:$("confetti"), wow:$("wow")};
 
-    // STATE + STORAGE
-    const SKEY='rania_final_plan_v1', SKEY_NOTES='rania_final_notes_v1';
+    // STORAGE & HELPERS
+    const SKEY='rania_final_plan_v6', SKEY_NOTES='rania_final_notes_v6', SKEY_FORM='rania_final_form_v5';
     function toast(msg){ el.toast.textContent=msg; el.toast.classList.add('show'); setTimeout(()=>el.toast.classList.remove('show'),1400); }
     function savePlan(p){ localStorage.setItem(SKEY, JSON.stringify(p)); toast('تم حفظ الخطة ✅'); }
     function loadPlan(){ try{return JSON.parse(localStorage.getItem(SKEY))||null}catch{return null} }
+    function saveForm(){ const f={total:el.total.value, hours:el.hours.value, exam:el.exam.value, focusMin:el.focusMin.value, breakMin:el.breakMin.value}; localStorage.setItem(SKEY_FORM, JSON.stringify(f)); }
+    function loadForm(){ try{ const f=JSON.parse(localStorage.getItem(SKEY_FORM)||'{}'); Object.entries(f).forEach(([k,v])=>{ if(v!==undefined && el[k]) el[k].value=v; }); }catch{} }
+    ;['total','hours','exam','focusMin','breakMin'].forEach(id=>$(id).addEventListener('change', saveForm));
 
-    // BUILD PLAN (one-day timeline)
-    function timeStr(d){ return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0') }
+    const timeStr=(d)=> String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+    const pick=(arr)=> arr[Math.floor(Math.random()*arr.length)];
+
+    // Praise & motivation pools
+    const PRAISE=[
+      'وااااااااو! شغل بطلة! 🏆',
+      'يا سلام! إبداعك لا يوصف ✨',
+      'ممتاز يا رانيا! استمري 👑',
+      'يا نجمة! خطوة أقرب للنجاح 🌟',
+      'عظمة على عظمة! 🔥',
+      'هيك الشغل الصح! 🙌',
+      'أحسنتِ! تقدّم ملحوظ 💪',
+      'رهااابة! كمّلي على نفس النسق 🚀'
+    ];
+    const MINI=['برافو!','تمام!','هيك!','يس!','تفاتيف ذهب!','يا عيني!'];
+    const EMOJIS=['🎉','✨','💥','🔥','🌟','🏆','💫','🪄','🎊','🥳'];
+    const MOTIV=[
+      '10 دقايق راحت! كمّلي يا بطلة! 💪',
+      'خمس صفحات زيادة بتفرق كثير! 📚',
+      'شهيق… زفير… ونكمل! 🌬️',
+      'ركّزي دقيقتين بس… وبعدين الباقي سهل ✨',
+      'الاستمرارية أقوى من الكمال. مشّيها! 🚶‍♀️',
+      'كل تِك عليها تقرّبك لهدفك 🎯'
+    ];
+
+    // Audio & speech
+    let actx; function ping(){ try{ actx=actx||new (window.AudioContext||window.webkitAudioContext)(); const o=actx.createOscillator(); const g=actx.createGain(); o.type='triangle'; o.frequency.value=880; g.gain.value=.001; o.connect(g); g.connect(actx.destination); o.start(); g.gain.exponentialRampToValueAtTime(.00001, actx.currentTime+0.25); o.stop(actx.currentTime+0.26);}catch{} }
+    function clap(){ try{ actx=actx||new (window.AudioContext||window.webkitAudioContext)(); const buf=actx.createBuffer(1, actx.sampleRate*0.25, actx.sampleRate); const data=buf.getChannelData(0); for(let i=0;i<data.length;i++){ data[i]=(Math.random()*2-1)*Math.pow(1-i/data.length,2); } const src=actx.createBufferSource(); src.buffer=buf; src.connect(actx.destination); src.start(); }catch{} }
+    function speak(text){ try{ const u=new SpeechSynthesisUtterance(text); u.lang='ar-JO'; u.rate=1; u.pitch=1; speechSynthesis.cancel(); speechSynthesis.speak(u); }catch{} }
+
+    // Confetti, emoji rain & fireworks
+    function burstWith(text){ el.wow.innerHTML = text; el.celebrate.classList.add('show');
+      const n=240; el.confetti.innerHTML=''; const vw=window.innerWidth;
+      for(let i=0;i<n;i++){ const p=document.createElement('div'); p.className='piece'; const x=Math.random()*vw; const delay=Math.random()*400; const scale=.5+Math.random()*1.6; p.style.left=x+'px'; p.style.top='-20px'; p.style.transform=`translateY(0) scale(${scale}) rotate(${Math.random()*360}deg)`; p.style.animationDelay=delay+'ms'; el.confetti.appendChild(p); }
+      setTimeout(()=>{ el.celebrate.classList.remove('show'); el.confetti.innerHTML=''; }, 2200);
+    }
+    function emojiRain(){ const n=40; const vw=innerWidth; for(let i=0;i<n;i++){ const e=document.createElement('div'); e.className='emoji'; e.textContent=pick(EMOJIS); e.style.left=(Math.random()*vw)+'px'; e.style.top='-40px'; e.style.fontSize=(26+Math.random()*22)+'px'; e.style.transform=`rotate(${Math.random()*40-20}deg)`; document.body.appendChild(e); setTimeout(()=>e.remove(),1600); }
+    }
+    let fw; (function setupFW(){ fw=document.createElement('canvas'); fw.width=innerWidth; fw.height=innerHeight; fw.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:58;'; document.body.appendChild(fw); window.addEventListener('resize',()=>{fw.width=innerWidth; fw.height=innerHeight}); })();
+    function fireworks(){ const c=fw.getContext('2d'); const parts=[]; const cx=Math.random()*fw.width, cy=fw.height*0.3+Math.random()*fw.height*0.3; for(let i=0;i<130;i++){ const a=Math.random()*Math.PI*2, s=Math.random()*3+1; parts.push({x:cx,y:cy,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:60}); }
+      let t=0; function anim(){ c.clearRect(0,0,fw.width,fw.height); parts.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; p.vy+=0.02; p.life--; c.fillStyle='rgba(124,153,255,'+(p.life/60)+')'; c.fillRect(p.x,p.y,2,2); }); if(t++<60) requestAnimationFrame(anim); else c.clearRect(0,0,fw.width,fw.height); } anim(); }
+    function miniSparkle(target){ const n=22; const r=target.getBoundingClientRect(); const x=r.left+r.width/2, y=r.top+r.height/2; for(let i=0;i<n;i++){ const s=document.createElement('div'); s.className='spark'; document.body.appendChild(s); const a=Math.random()*Math.PI*2, d=10+Math.random()*60; const tx=x+Math.cos(a)*d, ty=y+Math.sin(a)*d; s.style.left=x+'px'; s.style.top=y+'px'; s.animate([{transform:'translate(0,0)',opacity:1},{transform:`translate(${tx-x}px,${ty-y}px)`,opacity:0}],{duration:700,fill:'forwards'}).onfinish=()=>s.remove(); }
+    }
+
+    function celebrate(){ const msg = pick(PRAISE); toast(msg); clap(); ping(); speak(msg); burstWith(`${msg} ${pick(EMOJIS)}`); emojiRain(); fireworks(); }
+
+    // PLAN BUILD (even distribution)
     function build(){
       const total=+el.total.value||0, hours=+el.hours.value||0; if(!total||!hours){ alert('رجاءً أدخلي عدد التشابترات والساعات المتاحة'); return }
-      const now=new Date(); const exam=el.exam.value? new Date(el.exam.value): null; const end = exam? new Date(Math.min(now.getTime()+hours*3600000, exam.getTime())) : new Date(now.getTime()+hours*3600000);
-      const f=+el.focusMin.value||25, b=+el.breakMin.value||5; const block=f+b; const totalMin=Math.max(0,Math.floor((end-now)/60000)); const slots=Math.max(1,Math.floor(totalMin/block)); const perSlot=Math.max(0.25,total/slots);
-      const tasks=[]; let covered=0; let cursor=new Date(now);
-      for(let i=0;i<slots && covered<total;i++){
-        const s=new Date(cursor), e=new Date(cursor.getTime()+f*60000), be=new Date(e.getTime()+b*60000);
-        const chap=Math.floor(covered)+1;
-        tasks.push({title:`${timeStr(s)}–${timeStr(e)} | تش ${chap}: قراءة`, done:false});
-        tasks.push({title:`${timeStr(s)}–${timeStr(e)} | تش ${chap}: ملخص`, done:false});
-        tasks.push({title:`${timeStr(s)}–${timeStr(e)} | تش ${chap}: أسئلة`, done:false});
-        covered+=perSlot; cursor=be;
+      const now=new Date();
+      const exam=el.exam.value? new Date(el.exam.value): null;
+      if(exam && exam<=now){ alert('وقت الامتحان أقدم من الآن. عدلي الوقت أو اتركيه فارغًا.'); return }
+      const hardEnd = new Date(now.getTime()+hours*3600000);
+      const end = exam? new Date(Math.min(hardEnd.getTime(), exam.getTime())) : hardEnd;
+      const f=+el.focusMin.value||25, b=+el.breakMin.value||5; const block=f+b;
+      const totalMin=Math.max(0,Math.floor((end-now)/60000));
+      if(totalMin < f){ alert('الوقت المتاح أقل من مدة جلسة التركيز. زيدي الوقت أو قللي مدة الجلسة.'); return }
+      const slots=Math.max(1,Math.floor(totalMin/block));
+      const chaptersPerSlot = Math.ceil(total / slots);
+
+      const tasks=[]; const slotsArr=[]; let coveredCh=0; let cursor=new Date(now);
+      for(let s=0; s<slots && coveredCh<total; s++){
+        const start=new Date(cursor), endFocus=new Date(cursor.getTime()+f*60000), afterBreak=new Date(endFocus.getTime()+b*60000);
+        const startChap=coveredCh+1; const endChap=Math.min(total, coveredCh+chaptersPerSlot);
+        const rangeLabel = (startChap===endChap)? `تش ${startChap}` : `تش ${startChap}–${endChap}`;
+        slotsArr.push({start: timeStr(start), end: timeStr(endFocus), label: rangeLabel});
+        for(let ch=startChap; ch<=endChap; ch++){
+          const win=`${timeStr(start)}–${timeStr(endFocus)}`;
+          tasks.push({title:`${win} | تش ${ch}: قراءة`, done:false});
+          tasks.push({title:`${win} | تش ${ch}: ملخص`, done:false});
+          tasks.push({title:`${win} | تش ${ch}: أسئلة`, done:false});
+        }
+        coveredCh = endChap; cursor = afterBreak;
       }
-      const plan={meta:{total,hours,focus:f,break:b,exam:exam?exam.toISOString():null}, tasks}; savePlan(plan); render(plan);
+
+      const plan={meta:{total,hours,focus:f,break:b,exam:exam?exam.toISOString():null, slots:slotsArr}, tasks};
+      savePlan(plan); render(plan);
       if('Notification' in window && Notification.permission!=='granted'){ Notification.requestPermission?.(); }
     }
 
     function render(plan){
-      // Today list
       el.today.innerHTML=''; const list=document.createElement('div'); list.className='list';
       plan.tasks.forEach((t,i)=>{
         const row=document.createElement('div'); row.className='task';
-        const left=document.createElement('div'); left.className='left'; const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=t.done; cb.addEventListener('change',()=>{ t.done=cb.checked; savePlan(plan); updateProgress(plan); if(cb.checked){ navigator.vibrate?.(15); if('Notification' in window){ new Notification('✔️ تم', { body: t.title }); } } checkEndgame(plan); }); const span=document.createElement('span'); span.textContent=t.title; left.append(cb,span);
-        const del=document.createElement('button'); del.className='btn warn'; del.textContent='حذف'; del.addEventListener('click',()=>{ plan.tasks.splice(i,1); savePlan(plan); render(plan); });
+        const left=document.createElement('label'); left.className='left'; left.setAttribute('aria-label', t.title);
+        const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=t.done; cb.disabled=t.done; cb.addEventListener('change',()=>{ t.done=true; cb.disabled=true; savePlan(plan); updateProgress(plan); navigator.vibrate?.(25); celebrate(); miniSparkle(row); checkEndgame(plan); });
+        const span=document.createElement('span'); span.textContent=t.title; left.append(cb,span);
+        const del=document.createElement('button'); del.className='btn warn'; del.textContent='حذف'; del.addEventListener('click',()=>{ plan.tasks.splice(i,1); savePlan(plan); render(plan); toast(pick(MINI)); });
+        if(t.done){ row.style.opacity=.78; row.style.filter='grayscale(18%)'; span.style.textDecoration='line-through'; }
         row.append(left,del); list.append(row);
       }); el.today.append(list);
 
-      // Timeline
       el.timeline.innerHTML=''; const tl=document.createElement('div'); tl.className='timeline';
-      const chunks = []; // compress by session window
-      plan.tasks.forEach(t=>{ const m=t.title.match(/^(\d{2}:\d{2})–(\d{2}:\d{2}) \| (.*)$/); if(!m) return; chunks.push({start:m[1], end:m[2], label:m[3]}); });
-      for(let i=0;i<chunks.length;i+=3){
-        const start=chunks[i]?.start, end=chunks[i]?.end; const label=(chunks[i]?.label||'جلسة');
-        const slot=document.createElement('div'); slot.className='slot';
-        const t1=document.createElement('div'); t1.textContent=`${start}–${end}`;
-        const t2=document.createElement('div'); t2.textContent=label;
-        const t3=document.createElement('div'); t3.className='muted'; t3.textContent='راحة + ماء';
-        slot.append(t1,t2,t3); tl.append(slot);
-      }
+      (plan.meta.slots||[]).forEach(s=>{ const slot=document.createElement('div'); slot.className='slot'; const t1=document.createElement('div'); t1.textContent=`${s.start}–${s.end}`; const t2=document.createElement('div'); t2.textContent=s.label; const t3=document.createElement('div'); t3.className='muted'; t3.textContent='راحة + ماء'; slot.append(t1,t2,t3); tl.append(slot); });
+      if(!plan.meta.slots || plan.meta.slots.length===0){ tl.innerHTML = '<p class="muted">لا يوجد شريط زمني بعد.</p>'; }
       el.timeline.append(tl);
 
       updateProgress(plan);
     }
 
-    // PROGRESS RING
-    function updateProgress(plan){ const total=plan.meta.total; const done = plan.tasks.filter(t=>t.done && /قراءة|ملخص|أسئلة/.test(t.title)).length/3; const pct = Math.min(100, Math.round((done/total)*100)); el.pct.textContent=pct+'%'; el.ring.style.strokeDashoffset = 327*(1-pct/100); }
+    function updateProgress(plan){ const total=plan.meta.total||0; if(!total){ el.pct.textContent='0%'; el.ring.style.strokeDashoffset = 327; return }
+      const doneTasks = plan.tasks.filter(t=>t.done && /قراءة|ملخص|أسئلة/.test(t.title)).length; const doneChapters = doneTasks/3; const pct = Math.min(100, Math.round((doneChapters/total)*100)); el.pct.textContent=pct+'%'; el.ring.style.strokeDashoffset = 327*(1-pct/100); }
 
-    // ENDGAME: punishment or prize
     function checkEndgame(plan){
       const total=plan.meta.total; const done = plan.tasks.filter(t=>t.done && /قراءة|ملخص|أسئلة/.test(t.title)).length/3;
       const allDone = total>0 && done>=total;
       if(allDone){ setTimeout(()=>{ location.href='الجائزة.html?total='+total; }, 600); return }
-      const exam=plan.meta.exam? new Date(plan.meta.exam): null; if(exam){
-        const left = exam - new Date(); if(left<=0 && done<total){ location.href = 'العقاب.html?total='+total+'&done='+done; }
-      }
+      const exam=plan.meta.exam? new Date(plan.meta.exam): null; if(exam){ const left = exam - new Date(); if(left<=0 && done<total){ location.href = 'العقاب.html?total='+total+'&done='+Math.floor(done); } }
     }
 
-    // FOCUS SESSION
-    let timer=null, remain=0, running=false, onBreak=false;
-    function fmt(s){ const m=Math.floor(s/60), S=s%60; return String(m).padStart(2,'0')+':'+String(S).padStart(2,'0') }
-    function startFocus(){ if(running) return; const f=+(el.focusMin.value||25), b=+(el.breakMin.value||5); remain=f*60; running=true; onBreak=false; el.overlay.style.display='grid'; try{ document.documentElement.requestFullscreen(); }catch{} tick(); timer=setInterval(()=>{ remain--; tick(); if(remain<=0){ clearInterval(timer); running=false; if(!onBreak){ speak('وقت راحة خمس دقائق. أحسنتِ!'); onBreak=true; remain=b*60; timer=setInterval(()=>{ remain--; tick(); if(remain<=0){ clearInterval(timer); running=false; el.overlay.style.display='none'; document.exitFullscreen?.(); speak('الراحة خلصت، لنبدأ جلسة جديدة.'); } },1000); } } },1000); }
-    function stopFocus(){ clearInterval(timer); running=false; el.overlay.style.display='none'; document.exitFullscreen?.(); el.focusLabel.textContent='00:00'; }
+    // Focus timers
+    let timer=null; let remain=0; let running=false; let onBreak=false;
+    const fmt=(s)=>{ const m=Math.floor(s/60), S=s%60; return String(m).padStart(2,'0')+':'+String(S).padStart(2,'0') };
+    function clearTimer(){ if(timer){ clearInterval(timer); timer=null; } }
+    function startFocus(){ if(running) return; const f=+(el.focusMin.value||25), b=+(el.breakMin.value||5); remain=f*60; running=true; onBreak=false; el.overlay.style.display='grid'; try{ document.documentElement.requestFullscreen?.(); }catch{}
+      tick(); clearTimer(); timer=setInterval(()=>{ remain--; tick(); if(remain<=0){ clearTimer(); running=false; if(!onBreak){ speak('وقت راحة خمس دقائق. أحسنتِ!'); onBreak=true; remain=b*60; timer=setInterval(()=>{ remain--; tick(); if(remain<=0){ clearTimer(); running=false; el.overlay.style.display='none'; document.exitFullscreen?.(); speak('الراحة خلصت، لنبدأ جلسة جديدة.'); } },1000); } } },1000); }
+    function stopFocus(){ clearTimer(); running=false; el.overlay.style.display='none'; document.exitFullscreen?.(); el.focusLabel.textContent='00:00'; }
     function tick(){ el.focusLabel.textContent = fmt(remain) }
-    function speak(text){ try{ const u=new SpeechSynthesisUtterance(text); u.lang='ar-JO'; speechSynthesis.cancel(); speechSynthesis.speak(u); }catch{} }
 
-    // NOTES
+    // Notes
     function loadNotes(){ try{return localStorage.getItem(SKEY_NOTES)||''}catch{return ''} }
     function saveNotes(){ localStorage.setItem(SKEY_NOTES, el.notes.value); toast('تم حفظ الملاحظات ✅') }
     function exportNotes(){ const blob=new Blob([el.notes.value||''],{type:'text/plain'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='rania_notes.txt'; a.click(); URL.revokeObjectURL(url); }
 
-    // EVENTS
-    el.build.addEventListener('click', build); el.clear.addEventListener('click', ()=>{ localStorage.removeItem(SKEY); el.today.innerHTML='<p class="muted">ابني الخطة ليظهر جدول اليوم.</p>'; el.timeline.innerHTML='<p class="muted">سيظهر هنا جدول الجلسات والراحات.</p>'; updateProgress({meta:{total:0},tasks:[]}); });
+    // Timers: taunt (30m) + motivation (10m)
+    let tauntTimer=null, motTimer=null;
+    function setupTaunt(){ if(tauntTimer) clearInterval(tauntTimer); tauntTimer=setInterval(()=>{ speak('شكلك مش راح تكمّلي على الوقت زي ما كنت متوقع، هاهاها! يلا شدّي حالك!'); }, 30*60*1000); }
+    function setupMotivation(){ if(motTimer) clearInterval(motTimer); motTimer=setInterval(()=>{ const m=pick(MOTIV); toast(m); speak(m); ping(); }, 10*60*1000); }
+
+    // Events
+    el.build.addEventListener('click', build);
+    el.clear.addEventListener('click', ()=>{ localStorage.removeItem(SKEY); el.today.innerHTML='<p class="muted">ابني الخطة ليظهر جدول اليوم.</p>'; el.timeline.innerHTML='<p class="muted">سيظهر هنا جدول الجلسات والراحات.</p>'; updateProgress({meta:{total:0},tasks:[]}); });
     el.startFocus.addEventListener('click', startFocus); el.stopFocus.addEventListener('click', stopFocus); el.panic.addEventListener('click', stopFocus);
     el.saveNotes.addEventListener('click', saveNotes); el.exportNotes.addEventListener('click', exportNotes); el.clearNotes.addEventListener('click', ()=>{ el.notes.value=''; saveNotes(); });
 
     // INIT
-    (function init(){ const plan=loadPlan(); if(plan){ render(plan); } el.notes.value = loadNotes(); updateProgress(plan||{meta:{total:0},tasks:[]}); })();
+    (function init(){ loadForm(); const plan=loadPlan(); if(plan){ render(plan); } el.notes.value = loadNotes(); updateProgress(plan||{meta:{total:0},tasks:[]}); setupTaunt(); setupMotivation(); })();
   </script>
 </body>
 </html>
